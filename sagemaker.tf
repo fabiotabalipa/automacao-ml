@@ -21,7 +21,7 @@ resource "aws_sagemaker_notebook_instance_lifecycle_configuration" "stop_on_idle
 resource "aws_sagemaker_notebook_instance" "ml_playground" {
   name = "ml-playground"
   role_arn = aws_iam_role.service_sagemaker.arn
-  instance_type = "ml.p2.xlarge"
+  instance_type = var.instance_type
 	volume_size = 80
 	subnet_id = [for s in data.aws_subnet.default : s.id][0]
 	security_groups = [ aws_security_group.custom_ips.id ]
