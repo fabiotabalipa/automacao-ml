@@ -4,24 +4,38 @@ A motivação para o desenho desta arquitetura foi a necessidade de treinar mode
 
 ## Como funciona?
 
-* Quando um cientista de dados desejar realizar mineração de dados ou treinar um modelo de ML com o SageMaker, chama o *endpoint* para acordar a instância dormente: `https://<ID API>.execute-api.<Região>.amazonaws.com/v1/wake-up` e aguarda cerca de 3 min até que se inicie.
+* Quando um colega desejar utilizar o **Jupyter Lab**, deverá realizar uma requisição `GET` para um *endpoint* para ativar a instância subjacente. O endereço terá o formato `https://<ID API>.execute-api.<Região>.amazonaws.com/v1/start`. Após 1-3 min, tempo de inicialização da instância EC2, recarrega a requisição para obter a URL de acesso:
 
-* Após 40 minutos de inatividade - nenhuma interação na interface ou nenhum código em andamento no notebook -, o SageMaker recebe o comando para voltar a ficar dormente, e, assim, cessa potenciais gastos relacionados ao tempo de execução da instância.
+![request 1](https://user-images.githubusercontent.com/37602229/105111317-683c1500-5a9f-11eb-99bf-6a33c133660d.png)
+
+![request 2](https://user-images.githubusercontent.com/37602229/105111360-7e49d580-5a9f-11eb-8c87-4e81b6ba6a17.png)
+
+> A maneira mais simples de realizar essa requisição é colar na barra de endereços do navegador web.
+
+* Após 40 minutos de inatividade - *nenhuma interação na interface ou nenhum código em andamento no notebook* -, a instância recebe o comando para voltar a ficar dormente, e, assim, cessa potenciais gastos relacionados ao seu tempo de execução.
 
 ## Arquitetura
 
-![arquitetura](https://user-images.githubusercontent.com/37602229/104976472-05ce1080-59dc-11eb-8448-3578e263840b.png)
+![architecture](https://user-images.githubusercontent.com/37602229/105110038-7f2d3800-5a9c-11eb-9e9a-e446d106f40e.jpg)
+
+> Na v2, abolimos o uso do AWS SageMaker; assim, a infraestrutura está mais enxuta, com mais tipos de instâncias disponíveis e com custos ainda mais reduzidos.
 
 ## Terraform
 
 O Terraform é uma ferramenta de DevOps open-source desenvolvida pela HashiCorp que permite o uso de *Infrastructure as Code* (IaC) para provisionamento de recursos de múltiplos provedores *Infrastructure as a Service* (IaaS).
 
-## Configuração e execução
+## Instruções
 
 1. Criar arquivo `terraform.tfvars` para alimentar as variáveis de entrada:
 
-```
-default_vpc_id = "<ID VPC>"
+```hcl
+credentials_profile = "<perfil das credenciais>"
+
+region = "sa-east-1"
+
+key_name = "<par de chaves>"
+
+identity_file_path = "~/.ssh/<par de chaves>.pem"
 
 allowed_ips = [
 	# Fábio
@@ -30,20 +44,27 @@ allowed_ips = [
 	"<IP Henrique>/32"
 	# ...
 ]
+
+instance_type = "t2.micro"
 ```
+
+> Mais sobre os perfis de credenciais [aqui](https://docs.aws.amazon.com/pt_br/sdk-for-php/v3/developer-guide/guide_credentials_profiles.html).
+
+> Mais sobre par de chaves EC2 e acesso SSH: [aqui](https://docs.aws.amazon.com/pt_br/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html).
 
 2. Aplicar as configurações:
 ```shell
+cd infrastructure
 terraform init
 terraform plan
 terraform apply
 ```
 
-3. Verificar no console do API Gateway qual a URL para disparo da função lambda e repassá-la aos colegas.
+3. Verificar no console do API Gateway qual a URL para disparo da função lambda e repassá-la aos colegas detentores dos IPs liberados.
 
-## Contribuindo
+## Como contribuir
 
-Fique à vontade para abrir uma *issue* ou enviar um PR.
+Colaborações e sugestões são bem-vindas.
 
 ## Licença
 
