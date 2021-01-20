@@ -27,7 +27,7 @@ resource "aws_security_group" "custom_ips" {
 }
 
 resource "aws_instance" "jupyter_lab" {
-  ami = "ami-03a49dfc77581833f"
+  ami = var.ami
   instance_type = var.instance_type
 	key_name = var.key_name
 	security_groups = [ 

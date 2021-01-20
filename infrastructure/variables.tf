@@ -26,5 +26,10 @@ variable "allowed_ips" {
 variable "instance_type" {
 	type = string
 	default = "t2.micro"
-	description = "Default EC2 instance type for SageMaker"
+	description = "EC2 instance type"
+}
+
+variable "ami" {
+	type = string
+	description = "AMI for EC2 instance"
 }
