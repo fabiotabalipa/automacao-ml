@@ -34,3 +34,7 @@ override.tf.json
 terraform.rc
 
 .DS_Store
+
+infrastructure/files/auto_commit.sh
+infrastructure/files/jupyter_cfg_gen.py
+infrastructure/files/jupyter.service

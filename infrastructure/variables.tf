@@ -8,6 +8,17 @@ variable "region" {
 	description = "Região dos recursos"
 }
 
+variable "instance_type" {
+	type = string
+	default = "t2.micro"
+	description = "EC2 instance type"
+}
+
+variable "ami" {
+	type = string
+	description = "AMI for EC2 instance"
+}
+
 variable "key_name" {
 	type = string
 	description = "Par de chaves para acesso SSH"
@@ -20,16 +31,27 @@ variable "identity_file_path" {
 
 variable "allowed_ips" {
 	type = list(string)
-	description = "IPs allowed to access ML Playground"
+	description = "IPs allowed to ssh EC2 instance"
 }
 
-variable "instance_type" {
+variable "team_pass" {
 	type = string
-	default = "t2.micro"
-	description = "EC2 instance type"
+	description = "Password to allow access to Jupyter Lab"
+	sensitive = true
 }
 
-variable "ami" {
+variable "github_repo_name" {
 	type = string
-	description = "AMI for EC2 instance"
+	description = "Name from github repository"
+}
+
+variable "github_user_name" {
+	type = string
+	description = "Username from github"
+}
+
+variable "github_access_token" {
+	type = string
+	description = "Access token from github"
+	sensitive = true
 }

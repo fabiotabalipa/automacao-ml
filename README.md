@@ -1,24 +1,34 @@
-# Automação de Provisionamento para ML
+# Automação de provisionamento de recursos para ML
 
 A motivação para o desenho desta arquitetura foi a necessidade de treinar modelos de *Machine Learning* (ML) de maneira colaborativa com uma boa relação entre custo e benefício, sem manter instâncias em execução quando não estão sendo utilizadas.
 
 ## Como funciona?
 
-* Quando um colega desejar utilizar o **Jupyter Lab**, deverá realizar uma requisição `GET` para um *endpoint* para ativar a instância subjacente. O endereço terá o formato `https://<ID API>.execute-api.<Região>.amazonaws.com/v1/start`. Após 1-3 min, tempo de inicialização da instância EC2, recarrega a requisição para obter a URL de acesso:
+* Quando um colega desejar utilizar o **Jupyter Lab**, deverá: 
 
-![request 1](https://user-images.githubusercontent.com/37602229/105111317-683c1500-5a9f-11eb-99bf-6a33c133660d.png)
+	1. ...realizar uma requisição `GET` para um *endpoint* para ativar a instância subjacente. O endereço terá o formato `https://<ID API>.execute-api.<Região>.amazonaws.com/v1/start?pass=<senha>`; a resposta será:
 
-![request 2](https://user-images.githubusercontent.com/37602229/105111360-7e49d580-5a9f-11eb-8c87-4e81b6ba6a17.png)
+	```
+	{"message": "Jupyter Lab will start in 1-3 min. Wait and reload this request to get the access URL."}
+	```
 
-> A maneira mais simples de realizar essa requisição é colar na barra de endereços do navegador web.
+	2. ...após 1-3 min - tempo de inicialização da instância EC2 -, recarregar a requisição para obter a URL de acesso; a resposta será algo como:
+
+	```
+	{"message": "Jupyter Lab already running at http://ec2-3-215-117-171.compute-1.amazonaws.com:8443/lab. Remember: it will be inactive again when idle for 40 min."}
+	```
+
+	3. ...acessar a URL fornecida pela resposta e colocar a senha configurada.
+
+	> A maneira mais simples de realizar essas requisições é colar na barra de endereços do navegador web.
 
 * Após 40 minutos de inatividade - *nenhuma interação na interface ou nenhum código em andamento no notebook* -, a instância recebe o comando para voltar a ficar dormente, e, assim, cessa potenciais gastos relacionados ao seu tempo de execução.
+
+* Qualquer arquivo gerado dentro do Jupyter Lab é automaticamente salvo em um repositório privado do Github configurado.
 
 ## Arquitetura
 
 ![architecture](https://user-images.githubusercontent.com/37602229/105110038-7f2d3800-5a9c-11eb-9e9a-e446d106f40e.jpg)
-
-> Na v2, abolimos o uso do AWS SageMaker; assim, a infraestrutura está mais enxuta, com mais tipos de instâncias disponíveis e com custos ainda mais reduzidos.
 
 ## Terraform
 
@@ -29,28 +39,37 @@ O Terraform é uma ferramenta de DevOps open-source desenvolvida pela HashiCorp 
 1. Criar arquivo `terraform.tfvars` para alimentar as variáveis de entrada:
 
 ```hcl
-credentials_profile = "<perfil das credenciais>"
+credentials_profile = "<perfil das credenciais AWS>"
 
-region = "sa-east-1"
+region = "us-east-1"
 
-key_name = "<par de chaves>"
+key_name = "<nome do par de chaves para acesso instância SSH>"
 
-identity_file_path = "~/.ssh/<par de chaves>.pem"
+identity_file_path = "<caminho arquivo .pem para acesso instância SSH>"
 
 allowed_ips = [
-	# Fábio
-	"<IP Fábio>/32",
-	# Henrique
-	"<IP Henrique>/32"
-	# ...
+	# IP que pode acessar instância via SSH ...
+	"<IP administrador da instância>/32"
 ]
 
-instance_type = "t2.micro"
+team_pass = "<senha para os endpoints de inicialização e Jupyter Lab>"
+
+instance_type = "g4dn.4xlarge"
+
+ami = "ami-064d8dbbcc5ded164"
+
+github_repo_name = "<nome do repositório privado do Github>"
+
+github_user_name = "<nome do usuário no Github>"
+
+github_access_token = "<token de acesso do usuário no Github>"
 ```
 
 > Mais sobre os perfis de credenciais [aqui](https://docs.aws.amazon.com/pt_br/sdk-for-php/v3/developer-guide/guide_credentials_profiles.html).
 
 > Mais sobre par de chaves EC2 e acesso SSH: [aqui](https://docs.aws.amazon.com/pt_br/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html).
+
+> Mais sobre a obtenção de token de acesso do usuário no Github aqui: [aqui](https://docs.github.com/pt/github/authenticating-to-github/creating-a-personal-access-token).
 
 2. Aplicar as configurações:
 ```shell

@@ -15,6 +15,7 @@ resource "aws_lambda_function" "start_ec2" {
 	timeout = 600
   environment {
     variables = {
+      "TEAM_PASS" = var.team_pass
 			"EC2_REGION" = var.region,
 			"EC2_INSTANCE_ID" = aws_instance.jupyter_lab.id
     }
